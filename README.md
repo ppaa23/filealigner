@@ -5,8 +5,6 @@
 ## Description
 This is a Flask-based web application that provides tools for creating file alignments. The app supports single and multiple alignments, generates phylogenetic trees for multiple alignments, and includes a heuristic search feature to find the most similar file among previously uploaded files.
 
----
-
 ## Installation
 
 1. Clone the repository:
@@ -14,13 +12,9 @@ This is a Flask-based web application that provides tools for creating file alig
    git clone https://github.com/your-username/your-repo.git
    cd your-repo
 
----
-
 ## Requirements
 
 Flask, Authlib/Oauth?, SQLAlchemy, requests library, Flask-Bootstrap, Flask-testing, Docker.
-
----
 
 ## Features
 - **Single File Alignment**: Upload two files and generate an alignment.
@@ -30,13 +24,9 @@ Flask, Authlib/Oauth?, SQLAlchemy, requests library, Flask-Bootstrap, Flask-test
 - **File Similarity Search**: Use heuristic search to find the most similar file from the database of previously uploaded files.
 - **History Management**: View, manage, and delete previously created alignments and uploaded files.
 
----
-
 ## Git
 
 main?
-
----
 
 ## Success criteria
 
