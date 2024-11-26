@@ -7,6 +7,21 @@ This is a Flask-based web application that provides tools for creating file alig
 
 ---
 
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/your-repo.git
+   cd your-repo
+
+---
+
+## Requirements
+
+Flask, Authlib/Oauth?, SQLAlchemy, requests library, Flask-Bootstrap, Flask-testing, Docker.
+
+---
+
 ## Features
 - **Single File Alignment**: Upload two files and generate an alignment.
 - **Multiple File Alignment**: Upload multiple files and generate a combined alignment along with a phylogenetic tree.
@@ -17,9 +32,12 @@ This is a Flask-based web application that provides tools for creating file alig
 
 ---
 
-## Installation
+## Git
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/your-repo.git
-   cd your-repo
+main?
+
+---
+
+## Success criteria
+
+Program successfully aligns given files, saves its result to history and visualize alignments
