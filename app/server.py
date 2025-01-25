@@ -1,63 +1,80 @@
-from flask import Flask, jsonify, render_template, request, json
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.secret_key = "YOUR_SECRET_KEY_HERE"  # Replace with a secure key in production
 
-# Helper function to load alignments from JSON file
-def load_alignments():
-    with open('alignments.json') as file:
-        return json.load(file)
+# Configure SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-# Save alignments to the JSON file
-def save_alignments(data):
-    with open('alignments.json', 'w') as file:
-        json.dump(data, file, indent=4)
+# Database model for user
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
 
-# --- Routes ---
+# Create tables if they don't exist
+with app.app_context():
+    db.create_all()
 
-# Home route
+# Helper function to get current user
+def current_user():
+    user_id = session.get('user_id')
+    if user_id:
+        return User.query.get(user_id)
+    return None
+
+# Routes
 @app.route('/')
-def home():
-    return render_template('home.html', title="Alignment Tracker")
+def index():
+    return render_template('index.html', current_user=current_user())
 
-# Route to view all alignments (GET)
-@app.route('/alignments', methods=['GET'])
-def view_alignments():
-    alignments = load_alignments()
-    return render_template('alignments.html', alignments=alignments, title="View Alignments")
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
 
-# Route to search alignments by title (GET)
-@app.route('/similarity/<title>', methods=['GET'])
-def get_similarity_by_title(title):
-    alignments = load_alignments()
-    for alignment in alignments:
-        if alignment['title'].lower() == title.lower():
-            return render_template('similarity.html', alignment=alignment, title="Alignment Similarity")
-    return jsonify({"error": "Alignment not found"}), 404
+        # Check if the username is already taken
+        if User.query.filter_by(username=username).first():
+            flash("Username already exists. Please choose another one.", "error")
+            return render_template('register.html', current_user=current_user())
 
-# Route to create a new alignment (POST)
-@app.route('/alignments/create', methods=['POST'])
-def create_alignment():
-    new_alignment = request.json
-    alignments = load_alignments()
-    alignments.append(new_alignment)
-    save_alignments(alignments)
-    return jsonify({"message": "Alignment created successfully!", "alignment": new_alignment}), 201
+        # Save the user
+        hashed_password = generate_password_hash(password)
+        new_user = User(username=username, password_hash=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
 
-# --- AJAX Form Route ---
-@app.route('/alignments/new', methods=['GET'])
-def new_alignment_form():
-    return render_template('new_alignment.html', title="New Alignment")
+        # Automatically log in the user
+        session['user_id'] = new_user.id
+        return redirect(url_for('index'))
 
-@app.route('/alignments/new', methods=['POST'])
-def handle_new_alignment():
-    title = request.form['title']
-    similarity = request.form['similarity']
-    alignments = load_alignments()
-    new_alignment = {"title": title, "similarity": similarity}
-    alignments.append(new_alignment)
-    save_alignments(alignments)
-    return jsonify({"message": "Alignment created successfully!", "alignment": new_alignment}), 201
+    return render_template('register.html', current_user=current_user())
 
-# --- Start the Flask App ---
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password_hash, password):
+            session['user_id'] = user.id
+            return redirect(url_for('index'))
+        else:
+            flash("Invalid username or password.", "error")
+            return render_template('login.html', current_user=current_user())
+
+    return render_template('login.html', current_user=current_user())
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    return redirect(url_for('index'))
+
 if __name__ == '__main__':
     app.run(debug=True)
