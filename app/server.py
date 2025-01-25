@@ -30,33 +30,38 @@ def current_user():
 # Routes
 @app.route('/')
 def index():
-    return render_template('index.html', current_user=current_user())
+    """Landing page for users who aren't logged in."""
+    if current_user():
+        return redirect(url_for('dashboard'))
+    return render_template('index.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """User registration."""
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
 
-        # Check if the username is already taken
+        # Check if username already exists
         if User.query.filter_by(username=username).first():
             flash("Username already exists. Please choose another one.", "error")
-            return render_template('register.html', current_user=current_user())
+            return render_template('register.html')
 
-        # Save the user
+        # Create new user
         hashed_password = generate_password_hash(password)
         new_user = User(username=username, password_hash=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 
-        # Automatically log in the user
+        # Log in the user automatically
         session['user_id'] = new_user.id
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
 
-    return render_template('register.html', current_user=current_user())
+    return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """User login."""
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -64,17 +69,34 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password_hash, password):
             session['user_id'] = user.id
-            return redirect(url_for('index'))
+            return redirect(url_for('dashboard'))
         else:
             flash("Invalid username or password.", "error")
-            return render_template('login.html', current_user=current_user())
+            return render_template('login.html')
 
-    return render_template('login.html', current_user=current_user())
+    return render_template('login.html')
 
 @app.route('/logout')
 def logout():
+    """Logout user."""
     session.pop('user_id', None)
     return redirect(url_for('index'))
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    """User workspace after login."""
+    if not current_user():
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        if 'file' not in request.files or request.files['file'].filename == '':
+            flash("No file selected.", "error")
+        else:
+            file = request.files['file']
+            # Process file (placeholder logic)
+            flash(f'File "{file.filename}" uploaded successfully!', "success")
+
+    return render_template('dashboard.html', current_user=current_user())
 
 if __name__ == '__main__':
     app.run(debug=True)
