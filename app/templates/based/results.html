@@ -1,0 +1,16 @@
+{% extends "based/base.html" %}
+
+{% block title %}Results - GoGiAlign{% endblock %}
+
+{% block content %}
+<header>
+  <h1>Alignment Results</h1>
+  <p>Similarity Score: <strong>{{ similarity }}</strong></p>
+</header>
+<section>
+  <h2>Aligned File 1</h2>
+  <pre>{{ aligned_file1 }}</pre>
+  <h2>Aligned File 2</h2>
+  <pre>{{ aligned_file2 }}</pre>
+</section>
+{% endblock %}
