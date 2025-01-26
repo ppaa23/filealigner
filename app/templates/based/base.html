@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}GoGiAlign{% endblock %}</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>GoGiAlign</h2>
+      <nav>
+        <ul>
+          <li><a href="{{ url_for('home') }}">Home</a></li>
+          <li class="dropdown">
+            <a href="#">Tools</a>
+            <ul class="dropdown-menu">
+              <li><a href="{{ url_for('align') }}">Pairwise Alignment</a></li>
+              <li><a href="{{ url_for('multialign') }}">Multiple Alignment</a></li>
+            </ul>
+          </li>
+          <li><a href="{{ url_for('history') }}">History</a></li>
+          <li><a href="{{ url_for('about') }}">About</a></li>
+          <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <!-- Main Content -->
+    <main class="main">
+      {% block content %}
+      <!-- Dynamic content will be inserted here -->
+      {% endblock %}
+    </main>
+  </div>
+</body>
+</html>

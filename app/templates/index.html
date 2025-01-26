@@ -1,26 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GoGiAlign - Home</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoGiAlign - Welcome</title>
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <header class="header">
-    <div class="logo">GoGiAlign</div>
-    <nav class="nav">
-      <a href="{{ url_for('register') }}">Sign Up</a>
-      <a href="{{ url_for('login') }}">Sign In</a>
-    </nav>
-  </header>
-  <main class="main">
-    <h1>Welcome to GoGiAlign</h1>
-    <p>The ultimate tool for creating, visualizing, and analyzing file alignments.</p>
-    <a href="{{ url_for('register') }}" class="btn-primary">Get Started</a>
-  </main>
-  <footer class="footer">
-    &copy; 2025 GoGiAlign. All rights reserved.
-  </footer>
+  <div class="center-container">
+    <header>
+      <h1 class="brand-logo">GoGiAlign</h1>
+      <p>The ultimate tool for creating, visualizing, and analyzing file alignments.</p>
+    </header>
+    <div class="action-buttons">
+      <a href="{{ url_for('register') }}" class="btn-primary">Sign Up</a>
+      <a href="{{ url_for('login') }}" class="btn-primary">Sign In</a>
+    </div>
+  </div>
 </body>
 </html>

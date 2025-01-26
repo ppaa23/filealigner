@@ -1,32 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GoGiAlign - Sign Up</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoGiAlign - Register</title>
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <header class="header">
-    <div class="logo">GoGiAlign</div>
-  </header>
-  <main class="form-container">
-    <h2>Sign Up</h2>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flash-messages">
-          {% for category, message in messages %}
-            <div class="flash flash-{{ category }}">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-    <form method="POST" action="{{ url_for('register') }}">
-      <input type="text" name="username" placeholder="Username" required />
-      <input type="password" name="password" placeholder="Password" required />
+  <div class="center-container">
+    <header>
+      <h1 class="brand-logo">GoGiAlign</h1>
+      <p>Create your account to start using GoGiAlign.</p>
+    </header>
+    <form method="POST" action="{{ url_for('register') }}" class="form-container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-messages">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" placeholder="Enter your username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" placeholder="Enter your password" required>
+      </div>
       <button type="submit" class="btn-primary">Sign Up</button>
     </form>
-    <a class="link" href="{{ url_for('login') }}">Already have an account? Sign in!</a>
-  </main>
+    <footer>
+      <p>Already have an account? <a href="{{ url_for('login') }}">Sign In</a></p>
+    </footer>
+  </div>
 </body>
 </html>

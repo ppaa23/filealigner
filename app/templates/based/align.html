@@ -1,0 +1,23 @@
+{% extends "based/base.html" %}
+
+{% block title %}Pairwise Alignment - GoGiAlign{% endblock %}
+
+{% block content %}
+<header>
+  <h1>Pairwise Alignment</h1>
+  <p>Upload two files below to perform a single-file alignment.</p>
+</header>
+<section>
+  <form action="{{ url_for('align') }}" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="file1">File 1:</label>
+      <input type="file" name="file1" id="file1" required>
+    </div>
+    <div class="form-group">
+      <label for="file2">File 2:</label>
+      <input type="file" name="file2" id="file2" required>
+    </div>
+    <button type="submit" class="btn-primary">Align</button>
+  </form>
+</section>
+{% endblock %}
