@@ -7,10 +7,30 @@
   <h1>Alignment Results</h1>
   <p>Similarity Score: <strong>{{ similarity }}</strong></p>
 </header>
+
 <section>
-  <h2>Aligned File 1</h2>
-  <pre>{{ aligned_file1 }}</pre>
-  <h2>Aligned File 2</h2>
-  <pre>{{ aligned_file2 }}</pre>
+  <!-- Code display -->
+  <div class="code-container">
+    <div class="code-box">
+      <h2>{{ file1_name }}</h2>
+      <pre>{{ file1 }}</pre>
+    </div>
+    <div class="code-box">
+      <h2>{{ file2_name }}</h2>
+      <pre>{{ file2 }}</pre>
+    </div>
+  </div>
+
+  <!-- Token display -->
+  <div class="token-container">
+    <div class="token-box">
+      <h2>Tokens: {{ file1_name }}</h2>
+      <pre>{{ file1_tokens | join(", ") }}</pre>
+    </div>
+    <div class="token-box">
+      <h2>Tokens: {{ file2_name }}</h2>
+      <pre>{{ file2_tokens | join(", ") }}</pre>
+    </div>
+  </div>
 </section>
 {% endblock %}

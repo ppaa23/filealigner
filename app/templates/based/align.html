@@ -5,17 +5,30 @@
 {% block content %}
 <header>
   <h1>Pairwise Alignment</h1>
-  <p>Upload two files below to perform a single-file alignment.</p>
+  <p>Upload two Python files for alignment.</p>
 </header>
+
 <section>
+  <!-- Display flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- File upload form -->
   <form action="{{ url_for('align') }}" method="POST" enctype="multipart/form-data">
     <div class="form-group">
       <label for="file1">File 1:</label>
-      <input type="file" name="file1" id="file1" required>
+      <input type="file" name="file1" id="file1">
     </div>
     <div class="form-group">
       <label for="file2">File 2:</label>
-      <input type="file" name="file2" id="file2" required>
+      <input type="file" name="file2" id="file2">
     </div>
     <button type="submit" class="btn-primary">Align</button>
   </form>

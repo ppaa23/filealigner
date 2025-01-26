@@ -26,7 +26,11 @@
         <td>{{ alignment.file2_name }}</td>
         <td>{{ alignment.similarity }}</td>
         <td>
+          {% if alignment.alignment_id in recent_alignment_ids %}
           <a href="{{ url_for('alignment_results', alignment_id=alignment.alignment_id) }}" class="btn-primary">View</a>
+          {% else %}
+          <span class="btn-disabled">Files Deleted</span>
+          {% endif %}
         </td>
       </tr>
       {% else %}

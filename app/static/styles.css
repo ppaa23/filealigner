@@ -314,3 +314,31 @@ form button {
   height: auto;
   margin-bottom: 1rem;
 }
+
+/* Results Page Styles */
+/* Code and Token Boxes */
+.code-container, .token-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.code-box, .token-box {
+  flex: 1; /* Ensure equal width */
+  max-height: 300px;
+  overflow-y: auto;
+  background: #f8f8f8;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box; /* Includes padding in width calculation */
+}
+
+.code-box pre, .token-box pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  color: #555;
+}
