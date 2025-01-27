@@ -26,9 +26,14 @@ class AlignmentHistory(db.Model):
     user_id = db.Column(db.Integer, nullable=False)
     file1_name = db.Column(db.String(120), nullable=False)
     file2_name = db.Column(db.String(120), nullable=False)
+    file1_content = db.Column(db.Text, nullable=False)  # Content of File 1
+    file2_content = db.Column(db.Text, nullable=False)  # Content of File 2
+    aligned_file1 = db.Column(db.Text, nullable=False)  # Aligned content of File 1
+    aligned_file2 = db.Column(db.Text, nullable=False)  # Aligned content of File 2
     similarity = db.Column(db.Float, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     alignment_id = db.Column(db.String(36), unique=True, nullable=False)
+
 
 with app.app_context():
     db.create_all()
@@ -111,116 +116,95 @@ def home():
 
 @app.route('/tools/pairwise', methods=['GET', 'POST'])
 def align():
-    """Handle pairwise alignment for Python files."""
+    """
+    Handle pairwise alignment for Python files. Save results to the database.
+    """
     if not current_user():
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        # Get files from the request
+        # Retrieve uploaded files
         file1 = request.files.get('file1')
         file2 = request.files.get('file2')
 
         # Initialize an error list
         errors = []
 
-        # Check if files are uploaded
-        if not file1 or file1.filename == '':
-            errors.append("File 1 is missing.")
-        if not file2 or file2.filename == '':
-            errors.append("File 2 is missing.")
-
-        # Check file extensions
+        # Validate file uploads
+        if not file1 or not file2:
+            errors.append("Both files are required.")
         if file1 and not file1.filename.endswith('.py'):
             errors.append("File 1 must be a Python file with a .py extension.")
         if file2 and not file2.filename.endswith('.py'):
             errors.append("File 2 must be a Python file with a .py extension.")
 
-        # Check file sizes
+        # Validate file sizes
         max_size = 1 * 1024 * 1024  # 1MB in bytes
         if file1 and file1.content_length > max_size:
             errors.append("File 1 must be smaller than 1MB.")
         if file2 and file2.content_length > max_size:
             errors.append("File 2 must be smaller than 1MB.")
 
-        # If errors exist, flash them and return to the page
+        # Handle errors
         if errors:
             for error in errors:
                 flash(error, "error")
             return redirect(url_for('align'))
 
-        # Read and process file content
-        file1_content = file1.read().decode('utf-8', errors='replace')
-        file2_content = file2.read().decode('utf-8', errors='replace')
+        # Read file content
+        file1_content = file1.read().decode('utf-8', errors='replace').strip()
+        file2_content = file2.read().decode('utf-8', errors='replace').strip()
+
+        # Perform alignment
         alignment_result = perform_alignment(file1_content, file2_content)
 
-        # Save files and alignment history
-        alignment_id = str(uuid.uuid4())
-        user_dir = os.path.join("uploads", str(session['user_id']))
-        alignment_dir = os.path.join(user_dir, alignment_id)
-        os.makedirs(alignment_dir, exist_ok=True)
-
-        file1_path = os.path.join(alignment_dir, "file1.py")
-        file2_path = os.path.join(alignment_dir, "file2.py")
-
-        with open(file1_path, "w", encoding="utf-8") as f1, open(file2_path, "w", encoding="utf-8") as f2:
-            f1.write(file1_content)
-            f2.write(file2_content)
-
+        # Save results to the database
         alignment = AlignmentHistory(
             user_id=session['user_id'],
             file1_name=file1.filename,
             file2_name=file2.filename,
-            similarity=alignment_result['similarity'],
-            alignment_id=alignment_id
+            file1_content=file1_content,
+            file2_content=file2_content,
+            aligned_file1=alignment_result['aligned_file1'],
+            aligned_file2=alignment_result['aligned_file2'],
+            similarity=alignment_result['similarity'],  # Save similarity score
+            alignment_id=str(uuid.uuid4())
         )
         db.session.add(alignment)
         db.session.commit()
 
-        # Manage storage for older alignments
-        manage_alignment_storage(session['user_id'])
-
-        # Redirect to results page
-        return redirect(url_for('alignment_results', alignment_id=alignment_id))
+        flash("Alignment successfully performed!", "success")
+        return redirect(url_for('alignment_results', alignment_id=alignment.alignment_id))
 
     return render_template('based/align.html')
 
-
 @app.route('/results/p/<alignment_id>')
 def alignment_results(alignment_id):
-    """Display the results of a specific alignment."""
+    """
+    Display the results of a specific alignment.
+    """
     if not current_user():
         return redirect(url_for('login'))
 
-    alignment = AlignmentHistory.query.filter_by(alignment_id=alignment_id, user_id=session['user_id']).first()
+    alignment = AlignmentHistory.query.filter_by(
+        alignment_id=alignment_id, user_id=session['user_id']
+    ).first()
+
     if not alignment:
-        flash("Result not found.", "error")
+        flash("Result not found or access denied.", "error")
         return redirect(url_for('history'))
 
-    user_dir = os.path.join("uploads", str(session['user_id']))
-    alignment_dir = os.path.join(user_dir, alignment_id)
-
-    file1_path = os.path.join(alignment_dir, "file1.py")
-    file2_path = os.path.join(alignment_dir, "file2.py")
-
-    try:
-        with open(file1_path, "r", encoding="utf-8") as f1, open(file2_path, "r", encoding="utf-8") as f2:
-            file1_content = "\n".join(line.strip() for line in f1 if line.strip())
-            file2_content = "\n".join(line.strip() for line in f2 if line.strip())
-    except FileNotFoundError:
-        flash("One or both files are missing for this alignment.", "error")
-        return redirect(url_for('history'))
-
-    file1_tokens = tokenize_code(file1_content)
-    file2_tokens = tokenize_code(file2_content)
-
-    return render_template('based/results.html',
-                           similarity=alignment.similarity,
-                           file1=file1_content,
-                           file2=file2_content,
-                           file1_tokens=file1_tokens,
-                           file2_tokens=file2_tokens,
-                           file1_name=alignment.file1_name,
-                           file2_name=alignment.file2_name)
+    # Render results with alignment data from the database
+    return render_template(
+        'based/results.html',
+        similarity=alignment.similarity,
+        file1=alignment.file1_content,
+        file2=alignment.file2_content,
+        file1_tokens=alignment.aligned_file1.split("\n"),  # Split tokens by lines
+        file2_tokens=alignment.aligned_file2.split("\n"),  # Split tokens by lines
+        file1_name=alignment.file1_name,
+        file2_name=alignment.file2_name
+    )
 
 @app.route('/tools/multialign', methods=['GET', 'POST'])
 def multialign():
@@ -245,14 +229,17 @@ def multialign():
 
 @app.route('/history')
 def history():
-    """View user's alignment history."""
+    """
+    View user's alignment history.
+    """
     if not current_user():
         return redirect(url_for('login'))
 
-    alignments = AlignmentHistory.query.filter_by(user_id=session['user_id']).order_by(AlignmentHistory.date_created.desc()).all()
-    recent_alignment_ids = [alignment.alignment_id for alignment in alignments[:5]]
+    alignments = AlignmentHistory.query.filter_by(user_id=session['user_id']).order_by(
+        AlignmentHistory.date_created.desc()
+    ).all()
 
-    return render_template('based/history.html', alignments=alignments, recent_alignment_ids=recent_alignment_ids)
+    return render_template('based/history.html', alignments=alignments)
 
 @app.route('/about')
 def about():
