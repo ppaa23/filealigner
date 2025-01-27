@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from alignment import perform_alignment, tokenize_code
+from alignment import perform_alignment
 
 app = Flask(__name__)
 app.secret_key = "23"
@@ -47,8 +47,8 @@ def current_user():
         return User.query.get(user_id)
     return None
 
+"""
 def manage_alignment_storage(user_id):
-    """Ensure only the last 5 alignments have files saved on disk."""
     alignments = AlignmentHistory.query.filter_by(user_id=user_id).order_by(AlignmentHistory.date_created).all()
     if len(alignments) > 5:
         for alignment in alignments[:-5]:  # Keep only the last 5 alignments
@@ -57,6 +57,7 @@ def manage_alignment_storage(user_id):
                 for file in os.listdir(alignment_dir):
                     os.remove(os.path.join(alignment_dir, file))
                 os.rmdir(alignment_dir)
+"""
 
 @app.route('/')
 def index():
