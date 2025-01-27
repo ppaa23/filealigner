@@ -1,5 +1,7 @@
-import os
+#import os
 import uuid
+import logging
+from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -40,6 +42,24 @@ class AlignmentHistory(db.Model):
 with app.app_context():
     db.create_all()
 
+# Configure logging
+def setup_logger():
+    # Create a rotating file handler (logs rotate at 5MB, keeping the last 3 logs)
+    handler = RotatingFileHandler('app.log', maxBytes=5 * 1024 * 1024, backupCount=3)
+    handler.setLevel(logging.INFO)  # Set logging level (INFO, DEBUG, WARNING, ERROR, CRITICAL)
+
+    # Set the logging format
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    handler.setFormatter(formatter)
+
+    # Add the handler to the Flask app logger
+    app.logger.addHandler(handler)
+    app.logger.setLevel(logging.INFO)
+
+# Initialize the logger
+setup_logger()
 def current_user():
     """Retrieve the currently logged-in user."""
     user_id = session.get('user_id')
@@ -62,6 +82,7 @@ def manage_alignment_storage(user_id):
 @app.route('/')
 def index():
     """Landing page."""
+    app.logger.info("Index page accessed.")
     if current_user():
         return redirect(url_for('home'))
     return render_template('index.html')
@@ -75,10 +96,12 @@ def register():
         confirm_password = request.form.get('confirm_password')
 
         if password != confirm_password:
+            app.logger.warning("Registration failed: Passwords do not match.")
             flash('Passwords do not match.', 'error')
             return render_template('register.html')
 
         if User.query.filter_by(username=username).first():
+            app.logger.warning("Registration failed: Username already exists.")
             flash("Username already exists. Please choose another one.", "error")
             return render_template('register.html')
 
@@ -88,6 +111,7 @@ def register():
         db.session.commit()
 
         session['user_id'] = new_user.id
+        app.logger.info(f"User registered successfully: {username}")
         return redirect(url_for('home'))
 
     return render_template('register.html')
@@ -101,9 +125,11 @@ def login():
 
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password_hash, password):
+            app.logger.info(f"User authorized successfully: {username}")
             session['user_id'] = user.id
             return redirect(url_for('home'))
         else:
+            app.logger.warning("Authorization failed: Invalid username or password.")
             flash("Invalid username or password.", "error")
             return render_template('login.html')
 
@@ -112,6 +138,7 @@ def login():
 @app.route('/logout')
 def logout():
     """Log out the current user."""
+    app.logger.info(f"User signed out successfully.")
     session.pop('user_id', None)
     return redirect(url_for('index'))
 
@@ -140,17 +167,22 @@ def align():
 
         # Validate file uploads
         if not file1 or not file2:
+            app.logger.warning("Alignment failed: Not all files uploaded.")
             errors.append("Both files are required.")
         if file1 and not file1.filename.endswith('.py'):
+            app.logger.warning("Alignment failed: Uploaded not a .py file.")
             errors.append("File 1 must be a Python file with a .py extension.")
         if file2 and not file2.filename.endswith('.py'):
+            app.logger.warning("Alignment failed: Uploaded not a .py file.")
             errors.append("File 2 must be a Python file with a .py extension.")
 
         # Validate file sizes
         max_size = 1 * 1024 * 1024  # 1MB in bytes
         if file1 and file1.content_length > max_size:
+            app.logger.warning("Alignment failed: Uploaded too big file.")
             errors.append("File 1 must be smaller than 1MB.")
         if file2 and file2.content_length > max_size:
+            app.logger.warning("Alignment failed: Uploaded too big file.")
             errors.append("File 2 must be smaller than 1MB.")
 
         # Handle errors
@@ -183,7 +215,6 @@ def align():
         db.session.add(alignment)
         db.session.commit()
 
-        flash("Alignment successfully performed!", "success")
         return redirect(url_for('alignment_results', alignment_id=alignment.alignment_id))
 
     return render_template('based/align.html')
@@ -201,6 +232,7 @@ def alignment_results(alignment_id):
     ).first()
 
     if not alignment:
+        app.logger.warning("Alignment displaying failed: Result not found or access denied.")
         flash("Result not found or access denied.", "error")
         return redirect(url_for('history'))
 
