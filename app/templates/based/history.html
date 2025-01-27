@@ -12,9 +12,10 @@
     <thead>
       <tr>
         <th>Date</th>
-        <th>File 1</th>
-        <th>File 2</th>
+        <th>File 1 name</th>
+        <th>File 2 name</th>
         <th>Similarity</th>
+        <th>Normalized score</th>
         <th>Action</th>
       </tr>
     </thead>
@@ -24,7 +25,8 @@
         <td>{{ alignment.date_created.strftime('%Y-%m-%d %H:%M:%S') }}</td>
         <td>{{ alignment.file1_name }}</td>
         <td>{{ alignment.file2_name }}</td>
-        <td>{{ "%.2f" | format(alignment.similarity) }}</td>
+        <td>{{ "%.3f" | format(alignment.similarity) }}</td>
+        <td>{{ "%.3f" | format(alignment.norm_score) }}</td>
         <td>
           <a href="{{ url_for('alignment_results', alignment_id=alignment.alignment_id) }}" class="btn-primary">View</a>
         </td>

@@ -163,12 +163,17 @@ def needleman_wunsch(seq1, seq2, match=2, mismatch=-1, gap=-2):
     aligned_seq2.reverse()
     return dp[n][m], aligned_seq1, aligned_seq2
 
+def calculate_normalized_similarity(score, len_seq1, len_seq2):
+    norm_similarity = score / max(len_seq1, len_seq2)
+    return norm_similarity
+
 def perform_alignment(file1_content, file2_content):
     """
     Perform pairwise alignment for Python files using token-based Needleman-Wunsch algorithm.
+    Calculate E-value for the alignment score.
     :param file1_content: Content of the first Python file.
     :param file2_content: Content of the second Python file.
-    :return: Dictionary with similarity score and aligned sequences.
+    :return: Dictionary with similarity score, aligned sequences, and E-value.
     """
     # Tokenize and abstract both files
     tokens1 = abstract_tokens(tokenize_code(file1_content))
@@ -184,8 +189,13 @@ def perform_alignment(file1_content, file2_content):
     # Calculate similarity as the ratio of matches to total alignment length
     similarity = matches / total_length if total_length > 0 else 0
 
+    # Calculate normalized similarity
+    norm_score = calculate_normalized_similarity(alignment_score, len(tokens1), len(tokens2))
+
     return {
-        "similarity": round(similarity, 2),
+        "similarity": round(similarity, 3),
+        "needleman_score": alignment_score,
+        "norm_score": round(norm_score, 3),
         "aligned_file1": " ".join(aligned_tokens1),
-        "aligned_file2": " ".join(aligned_tokens2),
+        "aligned_file2": " ".join(aligned_tokens2)
     }

@@ -30,7 +30,9 @@ class AlignmentHistory(db.Model):
     file2_content = db.Column(db.Text, nullable=False)  # Content of File 2
     aligned_file1 = db.Column(db.Text, nullable=False)  # Aligned content of File 1
     aligned_file2 = db.Column(db.Text, nullable=False)  # Aligned content of File 2
+    score = db.Column(db.Float, nullable=False)
     similarity = db.Column(db.Float, nullable=False)
+    norm_score = db.Column(db.Float, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     alignment_id = db.Column(db.String(36), unique=True, nullable=False)
 
@@ -69,6 +71,11 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        if password != confirm_password:
+            flash('Passwords do not match.', 'error')
+            return render_template('register.html')
 
         if User.query.filter_by(username=username).first():
             flash("Username already exists. Please choose another one.", "error")
@@ -167,7 +174,9 @@ def align():
             file2_content=file2_content,
             aligned_file1=alignment_result['aligned_file1'],
             aligned_file2=alignment_result['aligned_file2'],
-            similarity=alignment_result['similarity'],  # Save similarity score
+            score=alignment_result['needleman_score'],
+            similarity=alignment_result['similarity'],
+            norm_score=alignment_result['norm_score'],
             alignment_id=str(uuid.uuid4())
         )
         db.session.add(alignment)
@@ -197,7 +206,9 @@ def alignment_results(alignment_id):
     # Render results with alignment data from the database
     return render_template(
         'based/results.html',
+        score=alignment.score,
         similarity=alignment.similarity,
+        norm_score=alignment.norm_score,
         file1=alignment.file1_content,
         file2=alignment.file2_content,
         file1_tokens=alignment.aligned_file1.split("\n"),  # Split tokens by lines
@@ -219,13 +230,6 @@ def history():
     ).all()
 
     return render_template('based/history.html', alignments=alignments)
-
-@app.route('/about')
-def about():
-    """About page."""
-    if not current_user():
-        return redirect(url_for('login'))
-    return render_template('based/about.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
