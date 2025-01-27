@@ -78,7 +78,6 @@ def tokenize_code(code):
         pass
     return tokens
 
-
 def abstract_tokens(tokens):
     """
     Abstract raw tokens into high-level constructs.
@@ -104,7 +103,6 @@ def abstract_tokens(tokens):
             # General abstraction for remaining tokens
             abstracted_tokens.append("general_token")
     return abstracted_tokens
-
 
 def needleman_wunsch(seq1, seq2, match=2, mismatch=-1, gap=-2):
     """
@@ -164,7 +162,6 @@ def needleman_wunsch(seq1, seq2, match=2, mismatch=-1, gap=-2):
     aligned_seq1.reverse()
     aligned_seq2.reverse()
     return dp[n][m], aligned_seq1, aligned_seq2
-
 
 def perform_alignment(file1_content, file2_content):
     """

@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from alignment import perform_alignment, tokenize_code
 
 app = Flask(__name__)
-app.secret_key = "YOUR_SECRET_KEY_HERE"
+app.secret_key = "23"
 
 # Configure SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
@@ -205,27 +205,6 @@ def alignment_results(alignment_id):
         file1_name=alignment.file1_name,
         file2_name=alignment.file2_name
     )
-
-@app.route('/tools/multialign', methods=['GET', 'POST'])
-def multialign():
-    """Handle multiple alignment page."""
-    if not current_user():
-        return redirect(url_for('login'))
-
-    if request.method == 'POST':
-        # Retrieve uploaded files
-        files = request.files.getlist('files')
-
-        # Validate the number of files
-        if len(files) < 2:
-            flash("Please upload at least two files for multiple alignment.", "error")
-            return redirect(url_for('multialign'))
-
-        # Placeholder for multiple alignment logic
-        flash("Multiple alignment performed successfully!", "success")
-        return redirect(url_for('history'))
-
-    return render_template('based/multialign.html')
 
 @app.route('/history')
 def history():
