@@ -51,7 +51,7 @@ or open the link below:
 - `/history` (GET) - Displays the history of past alignments.
 
 ## Git
-Development is managed through the `main` branch.
+Development is managed through the `master` branch.
 
 ## Success Criteria
 - Program successfully aligns given files, saves the result to history, and visualizes alignments.
