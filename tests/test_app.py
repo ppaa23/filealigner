@@ -1,5 +1,5 @@
 import pytest
-from flask import session
+# from flask import session
 from app.server import app, db, User, AlignmentHistory
 
 @pytest.fixture
