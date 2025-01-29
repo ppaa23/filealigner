@@ -96,5 +96,3 @@
 - **User Registration & Authentication**: Allows users to register, log in, and log out.
 - **Pairwise File Alignment**: Users can upload two Python files for comparison.
 - **Alignment History**: Users can view past alignment results.
-- **Session-Based Authentication**: Ensures that users must log in before accessing alignment tools and history.
-
