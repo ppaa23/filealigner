@@ -1,5 +1,8 @@
 import pytest
-# from flask import session
+import sys
+
+sys.path.insert(0, ".")
+
 from app.server import app, db, User, AlignmentHistory
 
 @pytest.fixture
