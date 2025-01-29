@@ -230,7 +230,7 @@ def home():
     """
     if not current_user():
         return {"error": "Unauthorized. Please log in."}, 401
-    return render_template('based/home.html', current_user=current_user())
+    return render_template('based/home.html', current_user=current_user()), 200
 
 @app.route('/tools/pairwise', methods=['GET', 'POST'])
 def align():
@@ -324,7 +324,7 @@ def align():
 
         return redirect(url_for('alignment_results', alignment_id=alignment.alignment_id), code=303)
 
-    return render_template('based/align.html')
+    return render_template('based/align.html'), 200
 
 @app.route('/results/p/<alignment_id>')
 def alignment_results(alignment_id):
