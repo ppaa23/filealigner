@@ -57,3 +57,5 @@ Development is managed through the `master` branch.
 - Program successfully aligns given files, saves the result to history, and visualizes alignments.
 - User authentication and session management work as expected.
 
+## Video
+Here is the video capture showing basic functionality and features of GoGiAlign: https://youtu.be/c2bIPEo1qEw
