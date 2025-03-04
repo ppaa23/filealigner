@@ -9,8 +9,8 @@ This is a Flask-based web application that provides tools for creating file alig
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/nup-csai/flask-project-ppaa23.git
-   cd your-repo
+   git clone https://github.com/ppaa23/filealigner.git
+   cd filealigner
    ```
 
 2. Install dependencies:
